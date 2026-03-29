@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@bugiganga/types": ["../../packages/types/src/index.ts"],
+      "@bugiganga/dom-utils": ["../../packages/dom-utils/src/index.ts"],
+      "@bugiganga/agent-core": ["../../packages/agent-core/src/index.ts"]
+    }
+  },
+  "include": ["src", "sidebar.html"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "bugiganga",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=apps/backend",
+    "dev:extension": "npm run dev --workspace=apps/extension",
+    "build:extension": "npm run build --workspace=apps/extension",
+    "build:backend": "npm run build --workspace=apps/backend"
+  }
+}
