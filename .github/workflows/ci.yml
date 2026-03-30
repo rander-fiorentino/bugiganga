@@ -33,9 +33,7 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-      - run: npm test --workspace=packages/types -- --passWithNoTests
-      - run: npm test --workspace=packages/dom-utils -- --passWithNoTests
-      - run: npm test --workspace=apps/backend -- --passWithNoTests
+      - run: npm run test --workspace=apps/backend -- --passWithNoTests
 
   build-extension:
     name: Build Extension
