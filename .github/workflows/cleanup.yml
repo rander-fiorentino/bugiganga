@@ -1,0 +1,35 @@
+name: Remove tracked node_modules
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Remove tracked node_modules
+        run: |
+          git rm -r --cached node_modules --ignore-unmatch
+          git rm -r --cached apps/backend/.env --ignore-unmatch
+
+      - name: Commit and push
+        run: |
+          git status
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: remove tracked node_modules"
+            git push
+          else
+            echo "Nothing to commit"
+          fi                                                                                                                                                                                                          
