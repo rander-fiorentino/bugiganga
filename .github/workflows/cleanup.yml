@@ -9,22 +9,28 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - name: Clone without checkout
+        run: |
+          git clone --no-checkout https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} repo
+          cd repo
+          git sparse-checkout init --cone
+          git sparse-checkout set .github apps docker packages
+          git checkout main
 
       - name: Configure git
+        working-directory: repo
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Remove tracked node_modules
+        working-directory: repo
         run: |
           git rm -r --cached node_modules --ignore-unmatch
           git rm -r --cached apps/backend/.env --ignore-unmatch
 
       - name: Commit and push
+        working-directory: repo
         run: |
           git status
           if ! git diff --cached --quiet; then
@@ -32,4 +38,4 @@ jobs:
             git push
           else
             echo "Nothing to commit"
-          fi                                                                                                                                                                                                          
+          fi
