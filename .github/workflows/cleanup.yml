@@ -23,22 +23,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Remove tracked node_modules via tree
+      - name: Remove tracked node_modules
         working-directory: repo
         run: |
-          git ls-tree -r --name-only HEAD | grep -E '^node_modules/' > /tmp/nm_files.txt || true
-          git ls-tree -r --name-only HEAD | grep -E '^apps/backend/node_modules/' >> /tmp/nm_files.txt || true
-          wc -l /tmp/nm_files.txt
-          if [ -s /tmp/nm_files.txt ]; then
-            cat /tmp/nm_files.txt | xargs git rm --cached --ignore-unmatch
-          else
-            echo "No node_modules tracked"
-          fi
+          COUNT=$(git ls-tree -r --name-only HEAD | grep -cE '^(node_modules|apps/backend/node_modules)/' || echo 0)
+          echo "Files to remove: $COUNT"
+          git ls-tree -r --name-only HEAD | grep -E '^(node_modules|apps/backend/node_modules)/' | git update-index --stdin --remove
+          echo "Done"
 
       - name: Commit and push
         working-directory: repo
         run: |
-          git status
+          git diff --cached --stat
           if ! git diff --cached --quiet; then
             git commit -m "chore: remove tracked node_modules"
             git push
