@@ -7,6 +7,9 @@ import { saveLog, getLogs } from './logs/index'
 import { runTool } from './tools/executor'
 import { getSession, saveSession } from './memory/sessions'
 import type { AgentInput } from '@bugiganga/types'
+import memoryRouter from './routes/memory'
+import plannerRouter from './routes/planner'
+import toolsRouter from './routes/tools'
 
 const app = express()
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000
@@ -18,11 +21,10 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000
 app.use(
   cors({
     origin: '*', // Allow Chrome extension and any origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Session-Id'],
   })
 )
-
 app.use(express.json({ limit: '2mb' }))
 app.use(express.urlencoded({ extended: true }))
 
@@ -35,31 +37,33 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 // ============================================================
 // Health check
 // ============================================================
-
 app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    version: '0.1.0',
+    version: '0.2.0',
   })
 })
 
 // ============================================================
+// Phase 2 Routes
+// ============================================================
+app.use('/api/memory', memoryRouter)
+app.use('/api/planner', plannerRouter)
+app.use('/api/tools', toolsRouter)
+
+// ============================================================
 // Agent endpoint
 // ============================================================
-
 app.post('/agent', async (req: Request, res: Response) => {
   try {
     const input: AgentInput = req.body
-
     if (!input.message) {
       return res.status(400).json({ error: 'message is required' })
     }
-
     if (!input.sessionId) {
       return res.status(400).json({ error: 'sessionId is required' })
     }
-
     const output = await agentLoop(input)
     return res.json(output)
   } catch (err) {
@@ -72,14 +76,12 @@ app.post('/agent', async (req: Request, res: Response) => {
 })
 
 // ============================================================
-// Memory endpoints
+// Memory endpoints (legacy)
 // ============================================================
-
 app.post('/memory/save', async (req: Request, res: Response) => {
   try {
     const { sessionId, notes, extractedData, actions } = req.body
     if (!sessionId) return res.status(400).json({ error: 'sessionId is required' })
-
     await saveMemory({ sessionId, notes, extractedData, actions })
     return res.json({ success: true })
   } catch (err) {
@@ -102,12 +104,10 @@ app.get('/memory/session/:sessionId', async (req: Request, res: Response) => {
 // ============================================================
 // Logs endpoints
 // ============================================================
-
 app.post('/logs', async (req: Request, res: Response) => {
   try {
     const { sessionId, level, message, data } = req.body
     if (!sessionId) return res.status(400).json({ error: 'sessionId is required' })
-
     await saveLog({ sessionId, level: level || 'info', message, data })
     return res.json({ success: true })
   } catch (err) {
@@ -127,14 +127,12 @@ app.get('/logs/:sessionId', async (req: Request, res: Response) => {
 })
 
 // ============================================================
-// Tools endpoint
+// Tools endpoint (legacy)
 // ============================================================
-
 app.post('/tools/run', async (req: Request, res: Response) => {
   try {
     const { tool, input } = req.body
     if (!tool) return res.status(400).json({ error: 'tool name is required' })
-
     const result = await runTool(tool, input || {})
     return res.json(result)
   } catch (err) {
@@ -146,7 +144,6 @@ app.post('/tools/run', async (req: Request, res: Response) => {
 // ============================================================
 // Session endpoints
 // ============================================================
-
 app.get('/session/:id', async (req: Request, res: Response) => {
   try {
     const { id } = req.params
@@ -171,7 +168,6 @@ app.post('/session', async (req: Request, res: Response) => {
 // ============================================================
 // Error handler
 // ============================================================
-
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error('[Unhandled error]', err)
   res.status(500).json({ error: 'Internal server error' })
@@ -180,10 +176,10 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 // ============================================================
 // Start
 // ============================================================
-
 app.listen(PORT, () => {
   console.log(`[Bugiganga Backend] Server running on http://localhost:${PORT}`)
   console.log(`[Bugiganga Backend] Anthropic API key: ${process.env.ANTHROPIC_API_KEY ? 'set' : 'NOT SET'}`)
+  console.log(`[Bugiganga Backend] Routes: /api/memory, /api/planner, /api/tools`)
 })
 
 export default app
