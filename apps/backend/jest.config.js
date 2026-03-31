@@ -23,6 +23,5 @@ module.exports = {
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
-  setupFilesAfterFramework: [],
   testTimeout: 10000,
 };
