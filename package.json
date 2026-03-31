@@ -5,7 +5,15 @@
   "scripts": {
     "dev:backend": "npm run dev --workspace=apps/backend",
     "dev:extension": "npm run dev --workspace=apps/extension",
+    "dev:dashboard": "npm run dev --workspace=apps/dashboard",
+    "build:backend": "npm run build --workspace=apps/backend",
     "build:extension": "npm run build --workspace=apps/extension",
-    "build:backend": "npm run build --workspace=apps/backend"
+    "build:dashboard": "npm run build --workspace=apps/dashboard",
+    "build:packages": "npm run build --workspaces --if-present --workspace=packages/types --workspace=packages/agent-core --workspace=packages/dom-utils",
+    "test": "npm run test --workspaces --if-present",
+    "test:ci": "npm run test --workspace=apps/backend -- --ci --forceExit",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "validate": "npm run typecheck && npm run test:ci",
+    "setup": "bash setup.sh"
   }
 }
